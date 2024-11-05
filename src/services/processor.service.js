@@ -25,7 +25,7 @@ export const ProcessorService = {
         
         //TODO save images
 
-        return path.join("data", "2024_10_09")
+        return path.join("data", "envirosense")
     },
 
     /**
