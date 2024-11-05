@@ -3,9 +3,10 @@ import { PipelineManager } from "../models/pipeline.js"
 import { OpenSFMPipe } from "../models/opensfm_pipe.js"
 import log from "npmlog"
 import { readFileSync } from "fs"
+import fs from 'fs';
 import { createBearing, createUpVector, createViewingDirection, createCameraMatrix } from "./math.js"
 
-const openSfmPath = process.env.OPENSFM_PATH || "."
+const openSfmPath = process.env.DATA_PATH || "."
 
 export const ProcessorService = {
 
@@ -13,19 +14,17 @@ export const ProcessorService = {
      * 
      * @returns {string} Ideiglenes mappa a képeknek
      */
-    saveImagesTmp: () => {
+    createFolder: () => {
+        // const nowString = new Date().toLocaleDateString().replaceAll("/", "_")
+        const tmpDataModule = path.join(openSfmPath, "data", "envirosensesesese")
+        log.info("🔥tmpDataModule🔥: ",tmpDataModule)
 
-        // EZ a OpenSFM/data
-        const configPath = "../config"
-
-        // EZ lesz a mappa név
-        const nowString = new Date().toLocaleDateString().replaceAll("/", "_")
-        // const tmpDataModule = path.join(dataPath, nowString)
-        const tmpDataModule = path.join(openSfmPath, "data", "2024_10_09")
-        
-        //TODO save images
-
-        return path.join("data", "envirosense")
+        if (!fs.existsSync(tmpDataModule)) {
+            fs.mkdirSync(tmpDataModule, { recursive: true });
+        } else {
+            log.warn("⚠️ Mappa már létezik: ", tmpDataModule);
+        }
+        return tmpDataModule;
     },
 
     /**
