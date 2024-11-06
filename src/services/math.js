@@ -4,6 +4,8 @@
 
 import * as vec3 from 'gl-matrix/cjs/vec3.js';
 import * as mat4 from 'gl-matrix/cjs/mat4.js';
+import { enuToGeodetic } from 'mapillary-js/dist/mapillary.module.js';
+import log from 'npmlog';
 
 export function angleAxisToAngle(a) {
   const [x, y, z] = a;
@@ -118,4 +120,15 @@ export function wrap(value, min, max) {
     }
   }
   return value;
+}
+
+export function _enuToGeodetic(enu, reference) {
+  return enuToGeodetic(
+    enu[0],
+    enu[1],
+    enu[2],
+    reference.longitude,
+    reference.latitude,
+    reference.altitude,
+  );
 }

@@ -1,4 +1,3 @@
-
 import express from 'express';
 import { ProcessorService } from './services/processor.service.js';
 import { StreetViewerService } from './services/streeviewer.service.js';
@@ -26,12 +25,13 @@ app.post('/process_images', async (req, res) => {
   // Mappa tartalmának beállítása
   SetupService.initialize(tmpDataModule);
 
-  // Képek mentése a megadott forrásmappából, egyesével hívva a saveImagesFromDirectory-t
   for (const folder of targetFolders) {
       await StreetViewerService.saveImagesFromDirectory(tmpDataModule, folder);
   }
+  const pipeLineManager = ProcessorService.initializePipelineManager(tmpDataModule);
+  const shots =           ProcessorService.process(pipeLineManager)
 
-  res.send({ success: true, processedFolders: targetFolders });
+  res.send(shots)
 });
 
 app.listen(port, () => {

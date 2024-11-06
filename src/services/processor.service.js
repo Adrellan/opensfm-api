@@ -4,12 +4,16 @@ import { OpenSFMPipe } from "../models/opensfm_pipe.js"
 import log from "npmlog"
 import { readFileSync } from "fs"
 import fs from 'fs';
-import { createBearing, createUpVector, createViewingDirection, createCameraMatrix } from "./math.js"
+import { createBearing, createUpVector, createViewingDirection, createCameraMatrix, _enuToGeodetic, createOpticalCenter } from "./math.js"
+import dotenv from 'dotenv';
+import { info } from "console"
 
+dotenv.config();
 const openSfmPath = process.env.DATA_PATH || "."
 
-export const ProcessorService = {
 
+
+export const ProcessorService = {
     /**
      * 
      * @returns {string} Ideiglenes mappa a képeknek
@@ -63,7 +67,7 @@ export const ProcessorService = {
 
         log.verbose("Reading reconstruction.json as a result...")
 
-        const reconstrionFile = readFileSync(path.join(process.env.DATA_PATH, pipelineManager._dataset, "reconstruction.json"), { encoding: "utf8" })
+        const reconstrionFile = readFileSync(path.join(pipelineManager._dataset, "reconstruction.json"), { encoding: "utf8" })
         const reconstrionJson = JSON.parse(reconstrionFile);
 
         let allShots = {}
@@ -76,27 +80,39 @@ export const ProcessorService = {
 
         log.verbose("Number of shots of the reconstruction: " + allShots.length)
 
+        const reference_lla = readFileSync(path.join(pipelineManager._dataset, "reference_lla.json"), { encoding: "utf8" })
+        const reference = JSON.parse(reference_lla);
+        log.info("Reference LLA: ", reference)
+
         const result = []
-        // Számoljuk ki a compass angel-t és kicsit transformáljuk át az adatunkat
         for(const [key, shot] of Object.entries(allShots)){
             const vd = createViewingDirection(shot.rotation);
             const rt = createCameraMatrix(shot.rotation, shot.translation);
             const upVector = createUpVector(shot.orientation, rt);
             const computed_compass_angle = createBearing(vd, upVector);
-            log.info("Image id", key)
-            log.info("Compass angle", computed_compass_angle)
+
+            const rotation = shot.rotation;
+            const translation = shot.translation;
+            const opticalCenter = createOpticalCenter(rotation, translation);
+            const [clng, clat, calt] = _enuToGeodetic(opticalCenter, reference);
+            const computed_altitude = calt;
+            const computed_geometry = {
+              lat: clat,
+              lng: clng,
+            };
 
             const item = {
                 id:key,
                 gps_position: shot.gps_position,
                 computed_compass_angle,
-                gps_dop: shot.gps_dop
+                computed_altitude,
+                computed_geometry,
+                // gps_dop: shot.gps_dop
             }
             result.push(item)
         }
 
         return result;
 
-    }
-
+    },
 }

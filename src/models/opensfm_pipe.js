@@ -1,9 +1,9 @@
 import { execSync } from "child_process"
 import log from "npmlog"
 import path from "path";
+import dotenv from 'dotenv';
 
-
-
+dotenv.config();
 const BIN_OPENSFM = process.env.BIN_OPENSFM
 const openSfmPath = process.env.DATA_PATH || "."
 export class OpenSFMPipe {
@@ -32,10 +32,9 @@ export class OpenSFMPipe {
         try{
             log.info(`OpenSFM_${this._command}`, "Command begin to executed...");
 
-            const datasetPath = path.join(openSfmPath, dataset)
-            log.info(datasetPath)
+            log.info(dataset)
             // pl bin/opensfm extract_metadat data/berlin
-            const output = execSync(`${BIN_OPENSFM} ${this._command} ${datasetPath}`, { encoding: "utf-8", stdio:"inherit"})
+            const output = execSync(`${BIN_OPENSFM} ${this._command} ${dataset}`, { encoding: "utf-8", stdio:"inherit"})
     
             log.verbose(output);
 

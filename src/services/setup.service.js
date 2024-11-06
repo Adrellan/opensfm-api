@@ -1,7 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import log from 'npmlog';
+import dotenv from 'dotenv';
 
+dotenv.config();
 const openSfmPath = process.env.DATA_PATH || "."
 
 export const SetupService = {
@@ -30,7 +32,7 @@ export const SetupService = {
      * @param {string} destFolder A zsírúj mappa
      */
     copyConfig: (destFolder) => {
-        const configFilePath = openSfmPath+'data/envirosense/config.yaml';
+        const configFilePath = openSfmPath+'data/akaze/config.yaml';
         const destPath = path.join(destFolder, 'config.yaml');
 
         fs.copyFileSync(configFilePath, destPath);
