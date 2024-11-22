@@ -14,20 +14,16 @@ const openSfmPath = process.env.DATA_PATH || "."
 
 
 export const ProcessorService = {
-    /**
+/**
      * 
-     * @returns {string} Mappa létrehozása a feldolgozáshoz
+     * @param {string} folderName A létrehozandó mappa neve
+     * @returns {string} A létrehozott mappa elérési útja
      */
-    createFolder: () => {
-        const nowString = new Date().toLocaleDateString().replaceAll("/", "_")
-        const tmpDataModule = path.join(openSfmPath, "data", nowString)
-        log.info("🔥tmpDataModule🔥: ",tmpDataModule)
+    createFolder: (folderName) => {
+        const tmpDataModule = path.join(openSfmPath, "data", folderName)
 
-        if (!fs.existsSync(tmpDataModule)) {
-            fs.mkdirSync(tmpDataModule, { recursive: true });
-        } else {
-            log.warn("⚠️ Mappa már létezik: ", tmpDataModule);
-        }
+        fs.mkdirSync(tmpDataModule, { recursive: true });
+
         return tmpDataModule;
     },
 
@@ -52,7 +48,7 @@ export const ProcessorService = {
      * 
      * @param {PipelineManager} pipelineManager 
      */
-    process: (pipelineManager) => {
+    process: async (pipelineManager) => {
 
         log.info("Pipeline manager being executed")
         pipelineManager.execute();
@@ -80,7 +76,7 @@ export const ProcessorService = {
 
         const reference_lla = readFileSync(path.join(pipelineManager._dataset, "reference_lla.json"), { encoding: "utf8" })
         const reference = JSON.parse(reference_lla);
-        log.info("Reference LLA: ", reference)
+        // log.info("Reference LLA: ", reference)
 
         const result = []
         for(const [key, shot] of Object.entries(allShots)){
@@ -109,8 +105,6 @@ export const ProcessorService = {
             }
             result.push(item)
         }
-
         return result;
-
     },
 }
