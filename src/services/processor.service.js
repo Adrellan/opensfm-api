@@ -16,11 +16,11 @@ const openSfmPath = process.env.DATA_PATH || "."
 export const ProcessorService = {
     /**
      * 
-     * @returns {string} Ideiglenes mappa a képeknek
+     * @returns {string} Mappa létrehozása a feldolgozáshoz
      */
     createFolder: () => {
-        // const nowString = new Date().toLocaleDateString().replaceAll("/", "_")
-        const tmpDataModule = path.join(openSfmPath, "data", "envirosensesesese")
+        const nowString = new Date().toLocaleDateString().replaceAll("/", "_")
+        const tmpDataModule = path.join(openSfmPath, "data", nowString)
         log.info("🔥tmpDataModule🔥: ",tmpDataModule)
 
         if (!fs.existsSync(tmpDataModule)) {
@@ -32,12 +32,10 @@ export const ProcessorService = {
     },
 
     /**
-     * 
-     * @param {*} dataset 
+     * @param {string} dataset 
      * @returns {PipelineManager} pipelineManager
      */
     initializePipelineManager: (dataset) => {
-
         log.info("Pipeline manager being initialized...")
         const pipelineManager = new PipelineManager(dataset)
             .addPipe(OpenSFMPipe.create("extract_metadata"))
