@@ -1,37 +1,57 @@
 import log from "npmlog";
 import { OpenSFMPipe } from "./opensfm_pipe.js";
 
+
+
+
+
 export class PipelineManager {
+
+
     constructor(dataset) {
-        this._dataset = dataset;
-        this._pipes = [];
-        this.errors = [];
+        this.pipes = [];
+        this.errors = []
+        this._dataset = dataset
     }
 
+
+    /**
+     * 
+     * @param {OpenSFMPipe} pipe 
+     * @returns 
+     */
     addPipe(pipe) {
-        this._pipes.push(pipe);
+        this.pipes.push(pipe)
         return this;
     }
 
-    async execute() {
-        for (const pipe of this._pipes) {
+    execute() {
+        let output = "";
+        for (const pipe of this.pipes) {
+            const t1 = new Date();
+
             try {
-                if (typeof pipe === 'function') {
-                    await pipe(this._dataset);
-                } else {
-                    pipe.run(this._dataset);
-                }
-            } catch (error) {
+                output = pipe.run(this._dataset);
+            } catch (e) {
                 this.errors.push({
                     command: pipe._command,
-                    error,
-                    output: null
-                });
+                    error: e,
+                    output: output
+                })
+                return;
             }
+            const delta = (new Date() - t1) / 1000;
+            log.info("Time spent", `Pipe has ran in ${delta}s`)
         }
+        log.verbose("Count", `Number of successfully ran pipes: ${this.errors.length}`)
+        log.verbose("Count", `Number of errors: ${this.errors.length}`)
+
     }
 
-    getPipeCommands() {
-        return this._pipes.map(pipe => pipe._command).filter(command => command);
+    getPipeCommands(){
+        return this.pipes.map(x=>x._command);
     }
+
+
+
 }
