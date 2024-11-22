@@ -32,7 +32,7 @@ export const SetupService = {
      * @param {string} destFolder A zsírúj mappa
      */
     copyConfig: (destFolder) => {
-        const configFilePath = openSfmPath+'data/akaze/config.yaml';
+        const configFilePath = openSfmPath+'data/config_akaze/config.yaml';
         const destPath = path.join(destFolder, 'config.yaml');
 
         fs.copyFileSync(configFilePath, destPath);

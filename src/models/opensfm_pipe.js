@@ -13,7 +13,7 @@ export class OpenSFMPipe {
 
     /**
      * 
-     * @param {"extract_metadata" | "detect_features" | "match_features" | "create_tracks" | "reconstruct" | "mesh" | "undistort" | "compute_depthmaps"}
+     * @param {"extract_metadata" | "detect_features" | "match_features" | "create_tracks" | "reconstruct" | "mesh" | "undistort" | "compute_depthmaps" | create_submodels | align_submodels } 
      * command Opensfm parancs (extract, reconstruct, etc... )
      */
 
