@@ -18,8 +18,6 @@ export const StreetViewerService = {
             const sourceDirectory = process.env.SOURCE_DIRECTORY;
             const fullSourcePath = path.join(sourceDirectory, targetFolder);
 
-            log.info("SOURCEFOLDER: ", fullSourcePath);
-
             if (!fs.existsSync(fullSourcePath)) {
                 log.warn("⚠️ A forrásmappa nem található: ", fullSourcePath);
                 throw new Error(`A forrásmappa nem található: ${fullSourcePath}`);

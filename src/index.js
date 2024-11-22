@@ -24,36 +24,46 @@ app.post('/process_images', async (req, res) => {
     // Mappa létrehozása a feldolgozáshoz
     const tmpDataModule = ProcessorService.createFolder("process_directory");
 
-    // Mappa tartalmának beállítása
-    SetupService.initialize(tmpDataModule);
+    try {
+      // Mappa tartalmának beállítása
+      SetupService.initialize(tmpDataModule);
 
-    // Képek mentése a targetFolder-ből
-    await StreetViewerService.saveImagesFromDirectory(tmpDataModule, targetFolder);
+      // Képek mentése a targetFolder-ből
+      await StreetViewerService.saveImagesFromDirectory(tmpDataModule, targetFolder);
 
-    const pipeLineManager = ProcessorService.initializePipelineManager(tmpDataModule);
-    const shots = await ProcessorService.process(pipeLineManager);
+      const pipeLineManager = ProcessorService.initializePipelineManager(tmpDataModule);
+      const shots = await ProcessorService.process(pipeLineManager,targetFolder);
 
-    const sanitizedFolderName = targetFolder.replace(/\//g, '_');
-    
-    const outputFolder = ProcessorService.createFolder(targetFolder);
+      const sanitizedFolderName = targetFolder.replace(/\//g, '_');
+      
+      const outputFolder = ProcessorService.createFolder(sanitizedFolderName);
 
-    //a tmpDataModule mappából mentsük el a reconstruction.json-t az outputFolder mappába bele
-    const reconstructionJson = path.join(tmpDataModule, 'reconstruction.json');
-    const outputReconstructionJson = path.join(outputFolder, 'reconstruction.json');
-    fs.copyFileSync(reconstructionJson, outputReconstructionJson);
+      //a tmpDataModule mappából mentsük el a reconstruction.json-t az outputFolder mappába bele
+      const reconstructionJson = path.join(tmpDataModule, 'reconstruction.json');
+      const outputReconstructionJson = path.join(outputFolder, 'reconstruction.json');
+      fs.copyFileSync(reconstructionJson, outputReconstructionJson);
 
-    // amit visszaad a shots, azt is mentsük el a targetFolder mappába
-    const outputShots = path.join(outputFolder, 'shots.json');
-    fs.writeFileSync(outputShots, JSON.stringify(shots, null, 2));
+      // amit visszaad a shots, azt is mentsük el a targetFolder mappába
+      const outputShots = path.join(outputFolder, 'shots.json');
+      fs.writeFileSync(outputShots, JSON.stringify(shots, null, 2));
 
-    // töröljük a tmpDataModule mappát
-    fs.rmSync(tmpDataModule, { recursive: true, force: true });
-
-    res.send(shots);
+      res.send(shots);
+    } catch (error) {
+      log.error("Error processing images:", error);
+      fs.rmSync(tmpDataModule, { recursive: true, force: true });
+      throw error;
+    } finally {
+      if (fs.existsSync(tmpDataModule)) {
+        fs.rmSync(tmpDataModule, { recursive: true, force: true });
+      }
+    }
   } catch (error) {
-    log.error("Error processing images:", error);
     res.status(500).send({ error: "Failed to process images", details: error.message });
   }
+});
+
+app.get('/health', (req, res) => {
+  res.send({ status: 'ok' });
 });
 
 app.listen(port, () => {

@@ -47,8 +47,9 @@ export const ProcessorService = {
     /**
      * 
      * @param {PipelineManager} pipelineManager 
+     * @param {string} folderName 
      */
-    process: async (pipelineManager) => {
+    process: async (pipelineManager, folderName) => {
 
         log.info("Pipeline manager being executed")
         pipelineManager.execute();
@@ -95,8 +96,9 @@ export const ProcessorService = {
               lng: clng,
             };
 
+            const id = `${folderName}/${key}`;
             const item = {
-                id:key,
+                id:id,
                 gps_position: shot.gps_position,
                 computed_compass_angle,
                 computed_altitude,
