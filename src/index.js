@@ -15,12 +15,21 @@ const port = process.env.PORT;
 app.post('/process_images', async (req, res) => {
   try {
     const { targetFolder } = req.body || {};
-    log.info("🔥Image paths🔥:", req.body);
-
+    log.info("🔥Image path🔥:", req.body);
+    
     if (!targetFolder || typeof targetFolder !== 'string') {
-        return res.status(400).send({ error: "targetFolder is missing or is not a string in the request body" });
+      return res.status(400).send({ error: "targetFolder is missing or is not a string in the request body" });
     }
 
+    // Check if the targetFolder exists and is accessible
+    const sourceDirectory = process.env.SOURCE_DIRECTORY;
+    const fullSourcePath = path.join(sourceDirectory, targetFolder);
+
+    if (!fs.existsSync(fullSourcePath)) {
+      log.warn("⚠️ A forrásmappa nem található: ", fullSourcePath);
+      return res.status(404).send({ error: `A forrásmappa nem található: ${fullSourcePath}` });
+    }
+    
     // Mappa létrehozása a feldolgozáshoz
     const tmpDataModule = ProcessorService.createFolder("process_directory");
 
@@ -51,7 +60,7 @@ app.post('/process_images', async (req, res) => {
     } catch (error) {
       log.error("Error processing images:", error);
       fs.rmSync(tmpDataModule, { recursive: true, force: true });
-      throw error;
+      res.status(500).send({ error: "Failed to process images", details: error.message });
     } finally {
       if (fs.existsSync(tmpDataModule)) {
         fs.rmSync(tmpDataModule, { recursive: true, force: true });

@@ -7,60 +7,38 @@ import log from "npmlog";
 dotenv.config();
 
 export const StreetViewerService = {
-
     /**
-     * Képek letöltése és mentése
-     * @param {string} tmpDataModule A célmappa, amin belül az images mappába mentünk
-     * @param {string} targetFolder A forrásmappa neve
-     */
+      * Képek letöltése és mentése
+      * @param {string} tmpDataModule A célmappa, amin belül az images mappába mentünk
+      * @param {string} targetFolder A forrásmappa neve
+      */
     saveImagesFromDirectory: async (tmpDataModule, targetFolder) => {
-        try {
-            const sourceDirectory = process.env.SOURCE_DIRECTORY;
-            const fullSourcePath = path.join(sourceDirectory, targetFolder);
+        const sourceDirectory = process.env.SOURCE_DIRECTORY;
+        const fullSourcePath = path.join(sourceDirectory, targetFolder);
 
-            if (!fs.existsSync(fullSourcePath)) {
-                log.warn("⚠️ A forrásmappa nem található: ", fullSourcePath);
-                throw new Error(`A forrásmappa nem található: ${fullSourcePath}`);
+        if (!fs.existsSync(fullSourcePath)) {
+            log.warn("⚠️ A forrásmappa nem található: ", fullSourcePath);
+            throw new Error(`A forrásmappa nem található: ${fullSourcePath}`);
+        }
+
+        // Rekurzív képgyűjtő függvény
+        const getAllImageFiles = (directory) => {
+            let imageFiles = [];
+            const items = fs.readdirSync(directory, { withFileTypes: true });
+            for (const item of items) {
+                if (item.isDirectory()) {
+                    imageFiles = imageFiles.concat(getAllImageFiles(path.join(directory, item.name)));
+                } else if (item.isFile() && /\.(jpg|jpeg|png)$/i.test(item.name)) {
+                    imageFiles.push(path.join(directory, item.name));
+                }
             }
+            return imageFiles;
+        };
 
-            // Rekurzív képgyűjtő függvény
-            const getAllImageFiles = (directory) => {
-                let imageFiles = [];
-                const items = fs.readdirSync(directory, { withFileTypes: true });
-
-                items.forEach(item => {
-                    const fullPath = path.join(directory, item.name);
-                    if (item.isDirectory()) {
-                        // Ha az elem egy mappa, rekurzívan hívjuk meg
-                        imageFiles = imageFiles.concat(getAllImageFiles(fullPath));
-                    } else if (item.isFile()) {
-                        // Csak a kívánt képkiterjesztéseket mentjük
-                        const ext = path.extname(item.name).toLowerCase();
-                        if (['.jpg', '.jpeg'].includes(ext)) {
-                            imageFiles.push(fullPath);
-                        }
-                    }
-                });
-                return imageFiles;
-            };
-
-            // Összes kép beolvasása a célmappából és almappáiból
-            const imageFiles = getAllImageFiles(fullSourcePath);
-
-            const imagesDirectory = path.join(tmpDataModule, 'images')
-
-            // Képek mentése a zsírúj mappába
-            const promises = imageFiles.map(file => {
-                const destPath = path.join(imagesDirectory, path.basename(file));
-                fs.copyFileSync(file, destPath);
-                console.log(`Kép mentve: ${destPath}`);
-                return destPath;
-            });
-
-            return promises;
-        } catch (error) {
-            console.error(error.message);
-            throw error;
+        const imageFiles = getAllImageFiles(fullSourcePath);
+        for (const imageFile of imageFiles) {
+            const destPath = path.join(tmpDataModule, 'images', path.basename(imageFile));
+            fs.copyFileSync(imageFile, destPath);
         }
     }
 };
