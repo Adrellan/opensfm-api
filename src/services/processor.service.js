@@ -96,7 +96,7 @@ export const ProcessorService = {
               lng: clng,
             };
 
-            const id = `${folderName}/${key}`;
+            const id = `${folderName}${key}`;
             const item = {
                 id:id,
                 gps_position: shot.gps_position,

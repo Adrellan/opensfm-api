@@ -10,10 +10,11 @@ export const SetupService = {
     /**
      * Képek mappa létrehozása és szükséges fájlok másolása
      * @param {string} destFolder A zsírúj mappa, ahol a fájlok létrejönnek
+     * @param {string} processingMode Melyik configgal dolgozzuk fel a képeket
      */
-    initialize: (destFolder) => {
+    initialize: (destFolder, processingMode) => {
         SetupService.createImagesFolder(destFolder);
-        SetupService.copyConfig(destFolder);
+        SetupService.copyConfig(destFolder, processingMode);
         SetupService.createJsFile(destFolder);
     },
 
@@ -30,9 +31,10 @@ export const SetupService = {
     /**
      * Konfigurációs fájl másolása
      * @param {string} destFolder A zsírúj mappa
+     * @param {string} processingMode A módszer
      */
-    copyConfig: (destFolder) => {
-        const configFilePath = openSfmPath+'data/config_akaze/config.yaml';
+    copyConfig: (destFolder, processingMode) => {
+        const configFilePath = openSfmPath+`data/${processingMode}/config.yaml`;
         const destPath = path.join(destFolder, 'config.yaml');
 
         fs.copyFileSync(configFilePath, destPath);

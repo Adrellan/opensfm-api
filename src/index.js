@@ -14,7 +14,7 @@ const port = process.env.PORT;
 
 app.post('/process_images', async (req, res) => {
   try {
-    const { targetFolder } = req.body || {};
+    const { targetFolder, processingMode } = req.body || {};
     log.info("🔥Image path🔥:", req.body);
     
     if (!targetFolder || typeof targetFolder !== 'string') {
@@ -35,7 +35,7 @@ app.post('/process_images', async (req, res) => {
 
     try {
       // Mappa tartalmának beállítása
-      SetupService.initialize(tmpDataModule);
+      SetupService.initialize(tmpDataModule, processingMode);
 
       // Képek mentése a targetFolder-ből
       await StreetViewerService.saveImagesFromDirectory(tmpDataModule, targetFolder);
